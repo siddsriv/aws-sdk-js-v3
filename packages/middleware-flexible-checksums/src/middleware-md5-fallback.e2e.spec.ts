@@ -62,7 +62,7 @@ describe("S3 MD5 Fallback for DeleteObjects", () => {
     }
   });
 
-  it("should use CRC32 checksum by default for DeleteObjects", async () => {
+  it("DeleteObjects call succeeds with the default checksum", async () => {
     const response = await s3.send(
       new DeleteObjectsCommand({
         Bucket,
@@ -93,7 +93,6 @@ describe("S3 MD5 Fallback for DeleteObjects", () => {
             return next(args);
           }
 
-          const result = await next(args);
           const headers = request.headers;
 
           // Remove checksum headers
@@ -115,7 +114,8 @@ describe("S3 MD5 Fallback for DeleteObjects", () => {
             md5Added = true;
           }
 
-          return result;
+          // Call next after modifying headers
+          return next(args);
         },
       {
         step: "finalizeRequest",
